@@ -9,6 +9,7 @@ public class FrameAnimator : MonoBehaviour
 
     private SpriteRenderer render;
 
+    public bool loop = true;
     public float frameStartTime;
     private int currentFrame = 0;
 
@@ -33,7 +34,10 @@ public class FrameAnimator : MonoBehaviour
 
             if (currentFrame >= textures.Length)
             {
-                currentFrame = 0;
+                if (loop)
+                    currentFrame = 0;
+                else
+                    currentFrame--;
             }
 
             Destroy(render.sprite);

@@ -9,6 +9,7 @@ public class Player : MonoBehaviour
 
     public FrameAnimator idleAnim;
     public FrameAnimator walkAnim;
+    public FrameAnimator fireAnim;
     public GameObject carryAnimObject;
 
     public float x;
@@ -18,9 +19,13 @@ public class Player : MonoBehaviour
     public int tileY;
 
     public bool carrying;
+    public bool onFire; //shitshitshitshitshit
+
+    public PlayerOnFire onFireFunc;
+    public PlayerEscaped escapedFunc;
 
     public CrewmanRescued crewRescuedFunc;
-    public MapReset mapResetFunc;
+    public CrewmanPickedUp crewPickedUpFunc;
 
     // Use this for initialization
     void Start()
@@ -39,6 +44,18 @@ public class Player : MonoBehaviour
     {
         if (map == null)
             return;
+
+        if (onFire)
+        {
+            if (!fireAnim.enabled && (idleAnim.enabled || walkAnim.enabled))
+            {
+                idleAnim.enabled = false;
+                walkAnim.enabled = false;
+                fireAnim.enabled = true;
+            }
+
+            return;
+        }
 
         // perform any action we're currently capable of
         if (Input.GetKeyDown(KeyCode.Space))
@@ -69,8 +86,6 @@ public class Player : MonoBehaviour
             moveX -= speed;
         if (Input.GetKey(KeyCode.D) || Input.GetKey(KeyCode.RightArrow))
             moveX += speed;
-        if (Input.GetKey(KeyCode.R))
-            mapResetFunc();
         if (Input.GetKey(KeyCode.Escape))
             Application.Quit();
 
@@ -131,6 +146,10 @@ public class Player : MonoBehaviour
             }
         }
 
+        CheckIsPlayerOnFire();
+        if (onFire)
+            return;
+
         if (idleAnim.enabled)
         {
             if (moveX != 0f || moveY != 0f)
@@ -155,7 +174,7 @@ public class Player : MonoBehaviour
                 else if (moveX > 1f)
                     rend.flipX = false;
             }
-        }
+        }        
 
         x += moveX;
         y += moveY;
@@ -170,7 +189,28 @@ public class Player : MonoBehaviour
             var z = followCamera.transform.position.z;
             // offset camera by half in each direction
 
-            followCamera.transform.position = new Vector3(x + 32f, y + 32f, z);
+            followCamera.transform.position = new Vector3(x, y + 32f, z);
+        }
+    }
+
+    private void CheckIsPlayerOnFire()
+    {
+        // we're only trying to check if we weren't on fire
+        // and if we are now. In the other case we can just
+        // exit right away
+        if (onFire)
+            return;
+
+        // see if we're standing in any fires
+        foreach (var fire in map.fires)
+        {
+            if (fire.x == tileX && fire.y == tileY)
+            {
+                onFire = true;
+                GameObject.Find("AudioFire").GetComponent<AudioSource>().Play();
+                onFireFunc();
+                return;
+            }
         }
     }
 
@@ -183,12 +223,14 @@ public class Player : MonoBehaviour
             InjuredCrew cull = null;
             foreach (var injured in map.injured)
             {
-                if (injured.tileX == tileX && injured.tileY == tileY)
+                if (!injured.onFire && injured.tileX == tileX && injured.tileY == tileY)
                 { 
                     injured.Pickup();
                     cull = injured;
 
                     carrying = true;
+                    GameObject.Find("AudioPickup").GetComponent<AudioSource>().Play();
+                    crewPickedUpFunc();
 
                     // can only carry one at a time
                     break;
@@ -209,14 +251,16 @@ public class Player : MonoBehaviour
             {
                 if (carrying)
                 {
-                    crewRescuedFunc();
                     carrying = false;
+                    crewRescuedFunc();
                 }
                 else
                 {
-                    // level ends
-                    Debug.Log("player jumped");
+                    // player exited
+                    escapedFunc();
                 }
+
+                GameObject.Find("AudioJettison").GetComponent<AudioSource>().Play();
                 map.ShutExit(i);
             }
         }
