@@ -27,6 +27,7 @@ public class Game : MonoBehaviour
 
     public float timeSinceLastFire = 0f;
     public float timeSincePlayerOnFire = 0f;
+    public string timePlayerFinished = "";
 
     public int crewTotal = 0;
     public int crewDead = 0;
@@ -75,6 +76,7 @@ public class Game : MonoBehaviour
         crewLeft = crewTotal;
 
         levelTimerStart = Time.realtimeSinceStartup;
+        timePlayerFinished = "";
 
         panel.enabled = false;
         statusText.enabled = true;
@@ -97,7 +99,7 @@ public class Game : MonoBehaviour
             mapEndText.text += "\n";
             mapEndText.text += crewRescued + " crew rescued\n";
             mapEndText.text += crewDead + " crew died\n";
-            mapEndText.text += "You took " + levelTimerStart + " seconds\n";
+            mapEndText.text += "You took " + timePlayerFinished + " seconds\n";
             mapEndText.text += "\n\n";
 
             if (level + 1 < maxLevels)
@@ -127,7 +129,7 @@ public class Game : MonoBehaviour
                     mapEndText.text += "\n";
                     mapEndText.text += crewRescued + " crew rescued\n";
                     mapEndText.text += crewDead + " crew died\n";
-                    mapEndText.text += "You took " + levelTimerStart + " seconds\n";
+                    mapEndText.text += "You took " + timePlayerFinished + " seconds\n";
                     mapEndText.text += "\n\n\n\n\n\n\n\n\n";
                     mapEndText.text += "R to reset level";
                     panel.enabled = true;
@@ -182,6 +184,7 @@ public class Game : MonoBehaviour
 
     private void PlayerEscaped()
     {
+        timePlayerFinished = LevelTimer();
         playerEscaped = true;
         UpdateInstructionText();
         Destroy(player.gameObject);
@@ -189,6 +192,7 @@ public class Game : MonoBehaviour
 
     private void PlayerOnFire()
     {
+        timePlayerFinished = LevelTimer();
         music.Stop();
         timeSincePlayerOnFire = Time.realtimeSinceStartup;
         UpdateInstructionText();
@@ -213,7 +217,10 @@ public class Game : MonoBehaviour
         map.Clear();
         InitPlayer();
         InitLevel(level);
+
         timeSinceLastFire = Time.realtimeSinceStartup;
+        levelTimerStart = Time.realtimeSinceStartup;
+        timePlayerFinished = "";
 
         if (musicOn)
             music.Play();
