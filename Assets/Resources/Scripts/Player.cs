@@ -70,10 +70,9 @@ public class Player : MonoBehaviour
         if (Input.GetKey(KeyCode.D) || Input.GetKey(KeyCode.RightArrow))
             moveX += speed;
         if (Input.GetKey(KeyCode.R))
-        {
             mapResetFunc();
-            return;
-        }
+        if (Input.GetKey(KeyCode.Escape))
+            Application.Quit();
 
         moveX *= Time.deltaTime;
         moveY *= Time.deltaTime;
