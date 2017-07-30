@@ -89,9 +89,7 @@ public class Map
         this.crewDiedFunc = crewDiedFunc;
 
         LoadTextures();
-        LoadLevel(level);
-
-        GameObject.Find("AudioBackgroundFire").GetComponent<AudioSource>().Play();
+        LoadLevel(level);        
     }
 
     private void LoadTextures()

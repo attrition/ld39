@@ -15,6 +15,9 @@ public class Game : MonoBehaviour
     public SpriteRenderer render;
     public Camera playerCamera;
 
+    public AudioSource music;
+    private bool musicOn = true;
+
     public Player player;
 
     public Text statusText;
@@ -80,6 +83,9 @@ public class Game : MonoBehaviour
 
         UpdateStatusText();
         UpdateInstructionText();
+
+        if (musicOn)
+            music.Play();
     }
 
     private void UpdateInstructionText()
@@ -183,6 +189,7 @@ public class Game : MonoBehaviour
 
     private void PlayerOnFire()
     {
+        music.Stop();
         timeSincePlayerOnFire = Time.realtimeSinceStartup;
         UpdateInstructionText();
     }
@@ -207,6 +214,9 @@ public class Game : MonoBehaviour
         InitPlayer();
         InitLevel(level);
         timeSinceLastFire = Time.realtimeSinceStartup;
+
+        if (musicOn)
+            music.Play();
     }
 
     private void CrewmanRescued()
@@ -229,6 +239,15 @@ public class Game : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
+        if (Input.GetKeyDown(KeyCode.M))
+        {
+            musicOn = !musicOn;
+            if (musicOn)
+                music.Play();
+            else
+                music.Stop();
+        }
+
         if (Input.GetKeyDown(KeyCode.R))
         {
             ResetMap();
